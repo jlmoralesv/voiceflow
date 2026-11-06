@@ -19,12 +19,17 @@ sustituyen por alternativas abiertas y estándar.
 
 - 🎙️ **Atajo global de dictado** — funciona aunque la app no tenga el foco.
 - 🫧 **Barra flotante** translúcida que no roba el foco a la app donde escribes.
-- 🧠 **Transcripción** vía cualquier endpoint compatible con la API de OpenAI (`whisper-1`
-  en la nube, o un servidor local gratuito como `whisper.cpp` / `faster-whisper`).
+- 🧠 **Transcripción** vía cualquier endpoint compatible con la API de OpenAI
+  (`gpt-4o-mini-transcribe` en la nube, o un servidor local gratuito como `whisper.cpp` /
+  `faster-whisper`).
+- 🧹 **Limpieza automática del texto** — quita muletillas y, si dictaste una frase y te
+  corregiste a mitad de camino, se queda solo con la versión final que quisiste decir.
+- 🤫 **Auto-stop por silencio** y descarte de grabaciones vacías (evita transcripciones
+  "alucinadas" de un clip sin audio real).
 - ⌨️ **Inserción automática** del texto en la aplicación activa (portapapeles + pegado).
 - 📋 **Pegar la última transcripción** con un segundo atajo.
 - 🗂️ **Historial local** persistente; clic en una entrada para re-insertarla.
-- ⚙️ **Panel de ajustes** para atajos, idioma y modo de inserción.
+- ⚙️ **Panel de ajustes** para atajos, idioma, micrófono y modo de inserción.
 - 🌐 **Multi-idioma** — autodetección o idioma fijo (ISO 639-1).
 - 🔒 **Privado por defecto** — el audio solo viaja al endpoint de transcripción que tú
   configures; el historial se guarda en tu disco.
@@ -88,14 +93,16 @@ cp .env.example .env
 # .env
 VOICEFLOW_API_KEY=sk-...                                          # obligatoria
 VOICEFLOW_API_URL=https://api.openai.com/v1/audio/transcriptions  # opcional
-VOICEFLOW_MODEL=whisper-1                                          # opcional
+VOICEFLOW_MODEL=gpt-4o-mini-transcribe                             # opcional
+VOICEFLOW_TEXT_MODEL=gpt-4o-mini                                   # opcional
 ```
 
 | Variable | Obligatoria | Por defecto | Descripción |
 |----------|:-----------:|-------------|-------------|
-| `VOICEFLOW_API_KEY` | ✅ | — | Clave del endpoint de transcripción (o usa `OPENAI_API_KEY`). |
+| `VOICEFLOW_API_KEY` | ✅ | — | Clave del endpoint de transcripción y limpieza (o usa `OPENAI_API_KEY`). |
 | `VOICEFLOW_API_URL` | ❌ | `https://api.openai.com/v1/audio/transcriptions` | Endpoint de transcripción. |
-| `VOICEFLOW_MODEL` | ❌ | `whisper-1` | Modelo a usar. |
+| `VOICEFLOW_MODEL` | ❌ | `gpt-4o-mini-transcribe` | Modelo de transcripción. |
+| `VOICEFLOW_TEXT_MODEL` | ❌ | `gpt-4o-mini` | Modelo de texto usado para limpiar muletillas y frases reiniciadas. Si falla o no hay API key, se usa un filtro local sin red. |
 
 > **Nunca** subas tu `.env` al repositorio: ya está en `.gitignore`.
 
@@ -148,6 +155,7 @@ voiceflow/
 │   ├── env.js           # Carga del archivo .env (sin dependencias)
 │   ├── store.js         # Persistencia de ajustes e historial (JSON)
 │   ├── transcribe.js    # Llamada al endpoint de transcripción
+│   ├── cleanup.js       # Limpia muletillas y frases reiniciadas en el texto transcrito
 │   ├── paste.js         # Inserción de texto en la app activa
 │   └── renderer/
 │       ├── floating.html / floating.js  # Barra flotante de grabación

@@ -5,7 +5,7 @@ async function transcribe(buffer, mime, language) {
     process.env.VOICEFLOW_API_URL ||
     "https://api.openai.com/v1/audio/transcriptions";
   const apiKey = process.env.VOICEFLOW_API_KEY || process.env.OPENAI_API_KEY;
-  const model = process.env.VOICEFLOW_MODEL || "whisper-1";
+  const model = process.env.VOICEFLOW_MODEL || "gpt-4o-mini-transcribe";
 
   if (!apiKey) {
     throw new Error("Falta VOICEFLOW_API_KEY (o OPENAI_API_KEY) en el entorno.");

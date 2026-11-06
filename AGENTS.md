@@ -37,7 +37,10 @@ de dinero/seguridad), acompáñala de una comprobación mínima.
 - `src/env.js` — carga `.env`.
 - `src/store.js` — ajustes e historial en JSON.
 - `src/transcribe.js` — llamada de transcripción.
-- `src/cleanup.js` — filtra muletillas aisladas y normaliza puntuación del texto transcrito.
+- `src/cleanup.js` — limpia el texto transcrito: muletillas, frases reiniciadas a mitad
+  de camino (se queda con la versión final) y puntuación. Usa un modelo de texto barato
+  (`VOICEFLOW_TEXT_MODEL`, default `gpt-4o-mini`) con fallback determinista sin red si
+  falla o no hay API key.
 - `src/paste.js` — inserción de texto (portapapeles + `SendKeys`).
 - `src/renderer/floating.*` — barra flotante de grabación.
 - `src/renderer/hub.*` — panel de ajustes e historial.

@@ -28,7 +28,8 @@ src/
   env.js         Carga .env a process.env (sin dependencias). Requerido al inicio de main.js
   store.js       Ajustes + historial en un JSON (userData). API en memoria con persist()
   transcribe.js  POST multipart al endpoint de transcripción. Lee env en runtime
-  cleanup.js     Filtra muletillas aisladas y normaliza puntuación del texto transcrito
+  cleanup.js     Limpia el texto (muletillas, frases reiniciadas, puntuación) con un
+                 modelo de texto barato; cae a un filtro sin red si falla
   paste.js       Portapapeles + SendKeys ^v para insertar en la app enfocada
   renderer/
     floating.*   Barra flotante: graba (MediaRecorder) y envía el audio por IPC
