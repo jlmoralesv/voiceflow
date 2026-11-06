@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VoiceFlow</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-base: #0c0c0e;
+        --panel-bg: rgba(20, 20, 25, 0.72);
+        --panel-border: rgba(255, 255, 255, 0.08);
+        --input-bg: rgba(255, 255, 255, 0.04);
+        --input-bg-focus: rgba(255, 255, 255, 0.07);
+        --input-border: rgba(255, 255, 255, 0.1);
+        --input-border-hover: rgba(255, 255, 255, 0.18);
+        --input-border-focus: rgba(255, 255, 255, 0.42);
+        --menu-bg: #151519;
+        --text-primary: #f4f4f6;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+        --radius-panel: 14px;
+        --radius-control: 8px;
+        --radius-sm: 6px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        display: grid;
+        grid-template-columns: 310px 1fr;
+        gap: 16px;
+        padding: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif;
+        color: var(--text-primary);
+        background: var(--bg-base);
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Manchas de luz ambiental neutra (Aurora) */
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        width: 50vw;
+        height: 50vw;
+        border-radius: 50%;
+        filter: blur(110px);
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      body::before {
+        top: -16vw;
+        left: -10vw;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.18),
+          transparent 65%
+        );
+        animation: drift1 20s ease-in-out infinite alternate;
+      }
+
+      body::after {
+        bottom: -20vw;
+        right: -10vw;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.1),
+          transparent 65%
+        );
+        animation: drift2 24s ease-in-out infinite alternate;
+      }
+
+      @keyframes drift1 {
+        to { transform: translate(10vw, 8vh) scale(1.1); }
+      }
+      @keyframes drift2 {
+        to { transform: translate(-10vw, -6vh) scale(1.15); }
+      }
+
+      /* Paneles de cristal con bordes elegantes (no excesivamente redondeados) */
+      aside,
+      main {
+        position: relative;
+        border-radius: var(--radius-panel);
+        background:
+          radial-gradient(100% 60% at 15% 0%, rgba(255, 255, 255, 0.12), transparent 60%),
+          var(--panel-bg);
+        backdrop-filter: blur(36px) saturate(160%) brightness(1.04);
+        -webkit-backdrop-filter: blur(36px) saturate(160%) brightness(1.04);
+        border: 1px solid var(--panel-border);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.22),
+          0 18px 44px -12px rgba(0, 0, 0, 0.65),
+          0 2px 8px rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      aside {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Cabecera de panel */
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        flex-shrink: 0;
+      }
+
+      .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .panel-icon {
+        color: var(--text-secondary);
+        flex-shrink: 0;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--text-primary);
+      }
+
+      /* Lista de campos y grupos */
+      .fields-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        flex: 1;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        position: relative;
+      }
+
+      .field label {
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        color: var(--text-secondary);
+      }
+
+      .field-subtext {
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.3;
+      }
+
+      /* Inputs y campos de texto */
+      input {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px;
+        border-radius: var(--radius-control);
+        border: 1px solid var(--input-border);
+        background: var(--input-bg);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      }
+
+      input:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--input-border-hover);
+      }
+
+      input:focus {
+        background: var(--input-bg-focus);
+        border-color: var(--input-border-focus);
+        box-shadow:
+          0 0 0 3px rgba(255, 255, 255, 0.08),
+          inset 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Atajos con tipografía monoespaciada para legibilidad de teclas */
+      #dictationShortcut,
+      #pasteLastShortcut {
+        font-family: ui-monospace, "Cascadia Code", "Cascadia Mono", Consolas, monospace;
+        font-size: 12.5px;
+        letter-spacing: 0.3px;
+      }
+
+      /* Desplegable Glass Select */
+      .glass-select {
+        position: relative;
+        user-select: none;
+      }
+
+      /* Cuando el select está abierto, elevamos su z-index sobre el resto de campos */
+      .glass-select.open {
+        z-index: 999;
+      }
+
+      .glass-select select {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        pointer-events: none;
+        width: 100%;
+        height: 100%;
+      }
+
+      .glass-select-trigger {
+        width: 100%;
+        height: 38px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        padding: 0 12px;
+        border-radius: var(--radius-control);
+        border: 1px solid var(--input-border);
+        background: var(--input-bg);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      }
+
+      .glass-select-trigger:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--input-border-hover);
+      }
+
+      .glass-select.open .glass-select-trigger {
+        background: var(--input-bg-focus);
+        border-color: var(--input-border-focus);
+        box-shadow:
+          0 0 0 3px rgba(255, 255, 255, 0.08),
+          inset 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+
+      .glass-select-val {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-right: 8px;
+      }
+
+      .glass-select-arrow {
+        flex-shrink: 0;
+        color: var(--text-secondary);
+        transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      .glass-select.open .glass-select-arrow {
+        transform: rotate(180deg);
+        color: var(--text-primary);
+      }
+
+      /* MENÚ DESPLEGABLE: Fondo sólido y opaco oscuro para evitar que se vea el contenido de atrás */
+      .glass-select-menu {
+        position: absolute;
+        z-index: 1000;
+        left: 0;
+        right: 0;
+        top: calc(100% + 5px);
+        margin: 0;
+        padding: 5px;
+        list-style: none;
+        border-radius: var(--radius-control);
+        background: var(--menu-bg);
+        background: rgba(21, 21, 25, 0.98);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow:
+          0 16px 36px -4px rgba(0, 0, 0, 0.8),
+          0 4px 12px rgba(0, 0, 0, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        animation: menuFadeIn 0.14s ease-out;
+      }
+
+      /* Apertura hacia arriba cuando está cerca del borde inferior */
+      .glass-select.drop-up .glass-select-menu {
+        top: auto;
+        bottom: calc(100% + 5px);
+        box-shadow:
+          0 -16px 36px -4px rgba(0, 0, 0, 0.8),
+          0 -4px 12px rgba(0, 0, 0, 0.5),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+      }
+
+      @keyframes menuFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .glass-select-menu li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        font-size: 12.5px;
+        line-height: 1.4;
+        color: #d4d4d8;
+        cursor: pointer;
+        transition: background 0.1s, color 0.1s;
+      }
+
+      .glass-select-menu li:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+      }
+
+      .glass-select-menu li.selected {
+        background: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+        font-weight: 500;
+      }
+
+      .glass-select-menu .opt-text {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .glass-select-menu .opt-check {
+        display: none;
+        flex-shrink: 0;
+        color: #ffffff;
+      }
+
+      .glass-select-menu li.selected .opt-check {
+        display: block;
+      }
+
+      /* Tarjeta de ayuda inferior */
+      .hint-card {
+        margin-top: 24px;
+        padding: 12px;
+        border-radius: var(--radius-control);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      .hint-icon {
+        flex-shrink: 0;
+        margin-top: 1px;
+        color: var(--text-secondary);
+      }
+
+      .hint {
+        font-size: 11.5px;
+        line-height: 1.45;
+        color: var(--text-secondary);
+        margin: 0;
+      }
+
+      /* Botón de borrado de historial */
+      .btn-wipe {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-secondary);
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .btn-wipe:hover {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+      }
+
+      .btn-wipe:active {
+        transform: scale(0.97);
+      }
+
+      /* Lista de historial */
+      .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .entry {
+        padding: 12px 14px;
+        border-radius: var(--radius-control);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        cursor: pointer;
+        transition: transform 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s;
+      }
+
+      .entry:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.18);
+        box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.4);
+        transform: translateY(-1px);
+      }
+
+      .entry:active {
+        transform: translateY(0);
+      }
+
+      .entry > div {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #e4e4e7;
+        word-break: break-word;
+      }
+
+      .entry time {
+        display: block;
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 6px;
+      }
+
+      .empty-state {
+        padding: 48px 16px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+      }
+
+      .empty-state-icon {
+        color: var(--text-muted);
+        opacity: 0.5;
+        margin-bottom: 4px;
+      }
+
+      /* Scrollbar minimalista y estilizada */
+      aside::-webkit-scrollbar,
+      main::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      aside::-webkit-scrollbar-track,
+      main::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      aside::-webkit-scrollbar-thumb,
+      main::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 999px;
+      }
+
+      aside::-webkit-scrollbar-thumb:hover,
+      main::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <h2>Ajustes</h2>
+        </div>
+      </div>
+
+      <div class="fields-list">
+        <div class="field">
+          <label for="dictationShortcut">Atajo de dictado</label>
+          <input id="dictationShortcut" spellcheck="false" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="pasteLastShortcut">Atajo pegar último</label>
+          <input id="pasteLastShortcut" spellcheck="false" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="dictationMode">Modo</label>
+          <select id="dictationMode">
+            <option value="toggle">Alternar (pulsar para iniciar/parar)</option>
+            <option value="pushToTalk">Mantener (requiere hook nativo)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="language">Idioma</label>
+          <input id="language" placeholder="es, en, … (vacío = auto)" spellcheck="false" autocomplete="off" />
+          <span class="field-subtext">Código ISO (vacío para autodetección)</span>
+        </div>
+
+        <div class="field">
+          <label for="micDeviceId">Micrófono</label>
+          <select id="micDeviceId"></select>
+          <span class="field-subtext">Si deja de estar disponible, se usa el predeterminado del sistema</span>
+        </div>
+
+        <div class="field">
+          <label for="insertMode">Inserción</label>
+          <select id="insertMode">
+            <option value="paste">Pegar en la app activa</option>
+            <option value="none">Solo guardar en historial</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hint-card">
+        <svg class="hint-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <div class="hint" id="hint"></div>
+      </div>
+    </aside>
+
+    <main>
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg class="panel-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <h2>Historial</h2>
+        </div>
+        <button id="wipe" class="btn-wipe" title="Borrar historial completo">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          <span>Borrar historial</span>
+        </button>
+      </div>
+
+      <div id="list" class="history-list"></div>
+    </main>
+
+    <script src="./hub.js"></script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "voiceflow",
+  "version": "0.1.0",
+  "description": "Educational reimplementation of Typeless: global-hotkey voice dictation that transcribes and types into the focused app.",
+  "main": "src/main.js",
+  "type": "commonjs",
+  "keywords": [
+    "electron",
+    "speech-to-text",
+    "dictation",
+    "voice-typing",
+    "whisper",
+    "transcription"
+  ],
+  "scripts": {
+    "start": "electron ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}

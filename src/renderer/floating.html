@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+        user-select: none;
+        -webkit-font-smoothing: antialiased;
+      }
+      #bar {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 44px;
+        margin: 10px;
+        padding: 0 16px;
+        border-radius: 12px;
+        color: #f5f5f7;
+        background:
+          radial-gradient(120% 90% at 18% -35%, rgba(255, 255, 255, 0.4), transparent 55%),
+          linear-gradient(
+            160deg,
+            rgba(255, 255, 255, 0.14),
+            rgba(255, 255, 255, 0.03) 55%,
+            rgba(255, 255, 255, 0.08)
+          );
+        backdrop-filter: blur(36px) saturate(160%) contrast(1.05) brightness(1.08);
+        -webkit-backdrop-filter: blur(36px) saturate(160%) contrast(1.05) brightness(1.08);
+        box-shadow:
+          0 16px 36px -10px rgba(0, 0, 0, 0.6),
+          0 2px 8px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.4),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+      /* Borde de luz sutil en el canto */
+      #bar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.8) 0%,
+          rgba(255, 255, 255, 0.12) 40%,
+          rgba(255, 255, 255, 0.04) 60%,
+          rgba(255, 255, 255, 0.35) 100%
+        );
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+      #bar::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+          120deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.18) 50%,
+          transparent 70%
+        );
+        transform: translateX(-100%);
+        animation: sheen 3.5s ease-in-out infinite;
+        pointer-events: none;
+      }
+      @keyframes sheen {
+        0%, 60% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+      #dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 32% 28%, #ffffff, #d6d6da 55%, #b8b8bf);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 2px rgba(255, 255, 255, 0.85);
+        animation: pulse 1.1s ease-in-out infinite;
+        z-index: 1;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.35; transform: scale(0.85); }
+      }
+      #label {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        flex: 0 0 auto;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        z-index: 1;
+      }
+      #level {
+        height: 20px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        z-index: 1;
+      }
+      #level span {
+        flex: 1;
+        border-radius: 3px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.85);
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+        transition: height 0.08s ease;
+      }
+      .transcribing #dot {
+        background: radial-gradient(circle at 35% 30%, #ffffff, #9a9aa0);
+        opacity: 0.6;
+        animation: none;
+      }
+      .error #dot {
+        background: radial-gradient(circle at 35% 30%, #ffffff, #6a6a70);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        animation: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bar">
+      <div id="dot"></div>
+      <div id="label">Escuchando…</div>
+      <div id="level"></div>
+    </div>
+    <script src="./floating.js"></script>
+  </body>
+</html>
