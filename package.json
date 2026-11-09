@@ -13,10 +13,20 @@
     "transcription"
   ],
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder --win"
   },
   "license": "MIT",
   "devDependencies": {
-    "electron": "^33.0.0"
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.voiceflow.app",
+    "productName": "VoiceFlow",
+    "asar": false,
+    "files": ["src/**/*", "package.json"],
+    "win": { "target": "nsis", "signAndEditExecutable": false },
+    "nsis": { "oneClick": true, "perMachine": false }
   }
 }

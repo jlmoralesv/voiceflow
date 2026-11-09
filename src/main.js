@@ -103,8 +103,8 @@ function broadcastHistory() {
 ipcMain.handle("audio:recorded", async (_e, { buffer, mime }) => {
   floatingWin?.webContents.send("status", "transcribing");
   try {
-    const { language, insertMode } = store.getSettings();
-    const text = await transcribe(Buffer.from(buffer), mime, language);
+    const { language, insertMode, apiKey } = store.getSettings();
+    const text = await transcribe(Buffer.from(buffer), mime, language, apiKey);
     if (text) {
       store.addTranscript(text);
       broadcastHistory();
@@ -155,8 +155,9 @@ app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) =>
     cb(perm === "media"),
   );
+  if (app.isPackaged) app.setLoginItemSettings({ openAtLogin: true });
   createFloatingBar();
-  createHub();
+  if (!app.getLoginItemSettings().wasOpenedAtLogin) createHub();
   createTray();
   registerShortcuts();
 });

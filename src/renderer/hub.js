@@ -1,4 +1,5 @@
 const fields = [
+  "apiKey",
   "dictationShortcut",
   "pasteLastShortcut",
   "dictationMode",
@@ -154,6 +155,7 @@ async function init() {
 if (!window.voiceflow) {
   window.voiceflow = {
     getSettings: async () => ({
+      apiKey: "",
       dictationShortcut: "Control+Shift+Space",
       pasteLastShortcut: "Control+Shift+V",
       dictationMode: "toggle",

@@ -6,6 +6,7 @@ const FILE = path.join(app.getPath("userData"), "voiceflow.json");
 
 const DEFAULTS = {
   settings: {
+    apiKey: "",
     dictationShortcut: "Control+Shift+Space",
     pasteLastShortcut: "Control+Shift+V",
     dictationMode: "toggle",
