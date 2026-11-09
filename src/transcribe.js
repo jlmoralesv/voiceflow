@@ -1,6 +1,6 @@
 const { cleanupTranscript } = require("./cleanup");
 
-async function transcribe(buffer, mime, language, storedApiKey) {
+async function transcribe(buffer, mime, language, storedApiKey, aiCleanup) {
   const apiUrl =
     process.env.VOICEFLOW_API_URL ||
     "https://api.openai.com/v1/audio/transcriptions";
@@ -27,7 +27,7 @@ async function transcribe(buffer, mime, language, storedApiKey) {
     throw new Error(`Transcripción falló (${res.status}): ${await res.text()}`);
   }
   const data = await res.json();
-  return cleanupTranscript((data.text || "").trim());
+  return cleanupTranscript((data.text || "").trim(), aiCleanup);
 }
 
 module.exports = { transcribe };

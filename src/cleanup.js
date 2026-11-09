@@ -58,9 +58,10 @@ async function llmCleanup(text) {
   }
 }
 
-async function cleanupTranscript(text) {
+async function cleanupTranscript(text, aiCleanup = true) {
   if (!text) return "";
   const fallback = normalizePunctuation(stripFillers(text));
+  if (!aiCleanup) return fallback;
   const smart = await llmCleanup(text);
   return smart || fallback;
 }

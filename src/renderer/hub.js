@@ -5,6 +5,7 @@ const fields = [
   "dictationMode",
   "language",
   "micDeviceId",
+  "aiCleanup",
   "insertMode",
 ];
 const list = document.getElementById("list");
@@ -159,13 +160,22 @@ async function populateMicOptions() {
 async function init() {
   await populateMicOptions();
   const s = await window.voiceflow.getSettings();
-  for (const f of fields) document.getElementById(f).value = s[f] ?? "";
+  for (const f of fields) {
+    const el = document.getElementById(f);
+    if (el.type === "checkbox") el.checked = s[f] ?? true;
+    else el.value = s[f] ?? "";
+  }
   for (const select of document.querySelectorAll("select")) mountGlassSelect(select);
   renderHistory(await window.voiceflow.getHistory());
 
   for (const f of fields) {
     document.getElementById(f).addEventListener("change", async (e) => {
-      await window.voiceflow.setSettings({ [f]: e.target.value });
+      if (e.target.type === "checkbox") {
+        await window.voiceflow.setSettings({ [f]: e.target.checked });
+        return;
+      }
+      const value = f === "apiKey" ? e.target.value.trim() : e.target.value;
+      await window.voiceflow.setSettings({ [f]: value });
     });
   }
   document.getElementById("wipe").onclick = () => window.voiceflow.wipeHistory();
@@ -183,6 +193,7 @@ if (!window.voiceflow) {
       pasteLastShortcut: "Control+Shift+V",
       dictationMode: "toggle",
       language: "es",
+      aiCleanup: true,
       insertMode: "paste",
     }),
     setSettings: async () => ({}),

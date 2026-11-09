@@ -13,6 +13,7 @@ const DEFAULTS = {
     language: "",
     insertMode: "paste",
     micDeviceId: "",
+    aiCleanup: true,
   },
   history: [],
 };
@@ -32,7 +33,11 @@ function load() {
 let state = load();
 
 function persist() {
-  fs.writeFileSync(FILE, JSON.stringify(state, null, 2));
+  // Escritura atómica: si el proceso muere a mitad de guardar, el .tmp queda
+  // incompleto pero el archivo real nunca se corrompe (rename es atómico en NTFS).
+  const tmp = `${FILE}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(state, null, 2));
+  fs.renameSync(tmp, FILE);
 }
 
 module.exports = {

@@ -104,9 +104,9 @@ ipcMain.handle("audio:recorded", async (_e, { buffer, mime }) => {
   recording = false;
   floatingWin?.webContents.send("status", "transcribing");
   try {
-    const { language, insertMode, apiKey } = store.getSettings();
+    const { language, insertMode, apiKey, aiCleanup } = store.getSettings();
     if (apiKey) process.env.VOICEFLOW_API_KEY = apiKey;
-    const text = await transcribe(Buffer.from(buffer), mime, language, apiKey);
+    const text = await transcribe(Buffer.from(buffer), mime, language, apiKey, aiCleanup);
     if (text) {
       store.addTranscript(text);
       broadcastHistory();
