@@ -37,6 +37,10 @@ de dinero/seguridad), acompáñala de una comprobación mínima.
 - `src/env.js` — carga `.env`.
 - `src/store.js` — ajustes e historial en JSON.
 - `src/transcribe.js` — llamada de transcripción.
+- `src/cleanup.js` — limpia el texto transcrito: muletillas, frases reiniciadas a mitad
+  de camino (se queda con la versión final) y puntuación. Usa un modelo de texto barato
+  (`VOICEFLOW_TEXT_MODEL`, default `gpt-4o-mini`) con fallback determinista sin red si
+  falla o no hay API key.
 - `src/paste.js` — inserción de texto (portapapeles + `SendKeys`).
 - `src/renderer/floating.*` — barra flotante de grabación.
 - `src/renderer/hub.*` — panel de ajustes e historial.
@@ -51,8 +55,8 @@ de dinero/seguridad), acompáñala de una comprobación mínima.
 
 1. Al editar un `.html` del renderer, conserva los `id` y clases que su `.js` usa
    (`#bar`, `#dot`, `#label`, `#level`, `.transcribing`, `.error`; en el hub los `id` de
-   los campos de ajustes, `#list`, `#hint`, `#wipe`, `.entry`). Rómpelos y la UI deja de
-   funcionar sin error visible.
+   los campos de ajustes —incluye `apiKey` y `micDeviceId`—, `#list`, `#hint`, `#wipe`,
+   `.entry`). Rómpelos y la UI deja de funcionar sin error visible.
 2. `transcribe.js` lee `process.env` en tiempo de ejecución: carga `./env` antes de usarlo.
 3. La barra flotante es `focusable: false` para no robar el foco; no lo cambies.
 4. Micrófono: permitido solo el permiso `media` en `setPermissionRequestHandler`.
@@ -65,4 +69,5 @@ de dinero/seguridad), acompáñala de una comprobación mínima.
 
 ## Seguridad
 
-La clave de API vive en `.env` (ignorado por git). Nunca la imprimas entera ni la subas.
+La clave de API vive en `.env` (ignorado por git) o, para usuarios del instalador, en el
+store local (`apiKey` en Ajustes). Nunca la imprimas entera ni la subas.

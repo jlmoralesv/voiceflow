@@ -4,6 +4,7 @@ const fields = [
   "pasteLastShortcut",
   "dictationMode",
   "language",
+  "micDeviceId",
   "insertMode",
 ];
 const list = document.getElementById("list");
@@ -134,7 +135,29 @@ function mountGlassSelect(select) {
   sync();
 }
 
+async function populateMicOptions() {
+  const sel = document.getElementById("micDeviceId");
+  try {
+    // Pide permiso una vez para que enumerateDevices devuelva labels (sin esto,
+    // Chromium los da vacíos hasta que algún renderer haya usado el mic).
+    const tmp = await navigator.mediaDevices.getUserMedia({ audio: true });
+    tmp.getTracks().forEach((t) => t.stop());
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const mics = devices.filter((d) => d.kind === "audioinput");
+    sel.innerHTML = '<option value="">Predeterminado del sistema</option>';
+    mics.forEach((d, i) => {
+      const opt = document.createElement("option");
+      opt.value = d.deviceId;
+      opt.textContent = d.label || `Micrófono ${i + 1}`;
+      sel.appendChild(opt);
+    });
+  } catch {
+    sel.innerHTML = '<option value="">Predeterminado del sistema</option>';
+  }
+}
+
 async function init() {
+  await populateMicOptions();
   const s = await window.voiceflow.getSettings();
   for (const f of fields) document.getElementById(f).value = s[f] ?? "";
   for (const select of document.querySelectorAll("select")) mountGlassSelect(select);

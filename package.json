@@ -4,6 +4,9 @@
   "description": "Educational reimplementation of Typeless: global-hotkey voice dictation that transcribes and types into the focused app.",
   "main": "src/main.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
   "keywords": [
     "electron",
     "speech-to-text",

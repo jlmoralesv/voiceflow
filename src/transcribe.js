@@ -1,10 +1,12 @@
+const { cleanupTranscript } = require("./cleanup");
+
 async function transcribe(buffer, mime, language, storedApiKey) {
   const apiUrl =
     process.env.VOICEFLOW_API_URL ||
     "https://api.openai.com/v1/audio/transcriptions";
   const apiKey =
     storedApiKey || process.env.VOICEFLOW_API_KEY || process.env.OPENAI_API_KEY;
-  const model = process.env.VOICEFLOW_MODEL || "whisper-1";
+  const model = process.env.VOICEFLOW_MODEL || "gpt-4o-mini-transcribe";
 
   if (!apiKey) {
     throw new Error("Falta la API key. Pégala en el panel de Ajustes.");
@@ -25,7 +27,7 @@ async function transcribe(buffer, mime, language, storedApiKey) {
     throw new Error(`Transcripción falló (${res.status}): ${await res.text()}`);
   }
   const data = await res.json();
-  return (data.text || "").trim();
+  return cleanupTranscript((data.text || "").trim());
 }
 
 module.exports = { transcribe };

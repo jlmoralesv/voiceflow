@@ -28,6 +28,8 @@ src/
   env.js         Carga .env a process.env (sin dependencias). Requerido al inicio de main.js
   store.js       Ajustes + historial en un JSON (userData). API en memoria con persist()
   transcribe.js  POST multipart al endpoint de transcripción. Lee env en runtime
+  cleanup.js     Limpia el texto (muletillas, frases reiniciadas, puntuación) con un
+                 modelo de texto barato; cae a un filtro sin red si falla
   paste.js       Portapapeles + SendKeys ^v para insertar en la app enfocada
   renderer/
     floating.*   Barra flotante: graba (MediaRecorder) y envía el audio por IPC
@@ -46,8 +48,9 @@ Canales IPC: `recording:start|stop`, `status`, `history:changed` (main→rendere
 - **No rompas el contrato HTML↔JS.** El JS de cada renderer busca elementos por `id` y
   manipula clases concretas. Si editas `floating.html`/`hub.html`, conserva: en floating
   `#bar #dot #label #level` y las clases de estado `.transcribing`/`.error`; en hub los
-  `id` de los campos (`dictationShortcut`, `pasteLastShortcut`, `dictationMode`,
-  `language`, `insertMode`), `#list`, `#hint`, `#wipe` y las clases `.entry`/`.entry time`.
+  `id` de los campos (`apiKey`, `dictationShortcut`, `pasteLastShortcut`, `dictationMode`,
+  `language`, `micDeviceId`, `insertMode`), `#list`, `#hint`, `#wipe` y las clases
+  `.entry`/`.entry time`.
 - **`transcribe.js` lee `process.env` en cada llamada** (no al importar). Cualquier entrada
   que lo use debe haber cargado `./env` antes; `main.js` ya lo hace en su primera línea.
 - **La barra flotante es `focusable: false`** a propósito: así la app donde escribes
@@ -70,3 +73,5 @@ Canales IPC: `recording:start|stop`, `status`, `history:changed` (main→rendere
 
 - `.env` contiene la clave de API y está en `.gitignore`. Nunca lo subas ni lo imprimas
   completo. La plantilla pública es `.env.example`.
+- La clave también se puede pegar en el panel (campo `apiKey`); se guarda en el store
+  local del usuario, nunca en el instalador ni en el repo.

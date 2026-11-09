@@ -101,9 +101,11 @@ function broadcastHistory() {
 }
 
 ipcMain.handle("audio:recorded", async (_e, { buffer, mime }) => {
+  recording = false;
   floatingWin?.webContents.send("status", "transcribing");
   try {
     const { language, insertMode, apiKey } = store.getSettings();
+    if (apiKey) process.env.VOICEFLOW_API_KEY = apiKey;
     const text = await transcribe(Buffer.from(buffer), mime, language, apiKey);
     if (text) {
       store.addTranscript(text);
@@ -118,6 +120,12 @@ ipcMain.handle("audio:recorded", async (_e, { buffer, mime }) => {
     setTimeout(() => floatingWin?.hide(), 1500);
     return { ok: false, error: String(err.message || err) };
   }
+});
+
+ipcMain.handle("recording:discard", () => {
+  recording = false;
+  floatingWin?.webContents.send("status", "empty");
+  setTimeout(() => floatingWin?.hide(), 1200);
 });
 
 ipcMain.handle("settings:get", () => store.getSettings());

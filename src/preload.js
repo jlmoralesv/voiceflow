@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld("voiceflow", {
     ipcRenderer.on("history:changed", (_e, h) => cb(h)),
   sendAudio: (buffer, mime) =>
     ipcRenderer.invoke("audio:recorded", { buffer, mime }),
+  discardRecording: () => ipcRenderer.invoke("recording:discard"),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   setSettings: (patch) => ipcRenderer.invoke("settings:set", patch),
   getHistory: () => ipcRenderer.invoke("history:get"),

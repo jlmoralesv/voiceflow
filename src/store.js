@@ -12,6 +12,7 @@ const DEFAULTS = {
     dictationMode: "toggle",
     language: "",
     insertMode: "paste",
+    micDeviceId: "",
   },
   history: [],
 };
