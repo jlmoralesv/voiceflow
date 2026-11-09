@@ -1,6 +1,6 @@
 {
   "name": "voiceflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Educational reimplementation of Typeless: global-hotkey voice dictation that transcribes and types into the focused app.",
   "main": "src/main.js",
   "type": "commonjs",
